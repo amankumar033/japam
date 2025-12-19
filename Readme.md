@@ -75,29 +75,8 @@ The server will start on `http://localhost:3000` (or the port specified in `.env
 ### Production Mode
 ```bash
 npm start
-```
 
-## API Endpoints
-
-### Authentication
-
-#### POST `/api/auth/register`
-Register a new user.
-
-
-#### POST `/api/auth/login`
-Login and get JWT token.
-
-
-### Messages
-
-#### GET `/api/messages/history/:userId`
-Get chat history with a specific user. Requires authentication.
-
-
-
-
-## 📋 Method 1: Interactive Socket Client (Recommended)
+1.## 📋 Method 1: Interactive Socket Client (Recommended)
 
 ### Step 1: Get JWT Token
 
@@ -154,7 +133,7 @@ exit
 
 ```
 
-### For Frontend View 🧪 HTML Test Client (Easy Way to Test Real-Time Chat)
+2. ## For Frontend View 🧪 HTML Test Client (Easy Way to Test Real-Time Chat)
 
 
 ## 📋 Complete Step-by-Step Guide
@@ -184,39 +163,14 @@ fetch('http://localhost:3000/api/auth/register', {
 
 ### Step 2: Test Real-Time Messaging
 
-**Option A: Use test-client.html (EASIEST)**
-1. Open `test-client.html`
+1. Open `test-client.html`in browser 
 2. Paste token → Connect
 3. Enter receiver ID → Send message
 4. Open another tab with `test-client.html`
 5. Connect with second user's token
 6. **Messages appear in real-time!**
 
-**Option B: Browser Console**
-```javascript
-// User 1 connects
-const socket1 = io('http://localhost:3000', {
-  auth: { token: 'TOKEN_1' }
-});
-
-// User 2 connects (in another tab)
-const socket2 = io('http://localhost:3000', {
-  auth: { token: 'TOKEN_2' }
-});
-
-// User 1 sends message
-socket1.emit('message:send', {
-  content: 'Hello!',
-  receiverId: 'USER_2_ID'
-});
-
-// User 2 receives automatically
-socket2.on('message:received', (msg) => {
-  console.log('Received:', msg.content);
-});
-```
-
-### Step 3: Test Online/Offline Status
+### Step 2: Test Online/Offline Status
 
 **In test-client.html:**
 - Connect both users
@@ -224,21 +178,10 @@ socket2.on('message:received', (msg) => {
 - Disconnect one user
 - Other user sees "User [id] is offline" in Event Log
 
-**In browser console:**
-```javascript
-socket.on('user:status', (data) => {
-  console.log(`User ${data.userId} is ${data.status ? 'ONLINE' : 'OFFLINE'}`);
-});
-
-// Disconnect to test
-socket.disconnect();
-```
-
----
 ## Images
 
-![Socket Test Client – Connected](screenshots/1.png)
-![Socket Test Client – Connected](screenshots/2.png)
+![Socket Test Client – Connected](images/1.png)
+![Socket Test Client – Connected](images/2.png)
 
 
 ## 🎬 Quick Demo Flow
@@ -252,6 +195,23 @@ socket.disconnect();
 7. **Reconnect Tab 1** → Tab 2 sees "User online"
 
 ---
+
+## API Endpoints
+
+### Authentication
+
+#### POST `/api/auth/register`
+Register a new user.
+
+
+#### POST `/api/auth/login`
+Login and get JWT token.
+
+
+### Messages
+
+#### GET `/api/messages/history/:userId`
+Get chat history with a specific user. Requires authentication.
 
 
 ## Project Structure
