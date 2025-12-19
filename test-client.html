@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Chat Test Client</title>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+            margin: 10px 0;
+        }
+        .message {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .message.sent {
+            background-color: #e3f2fd;
+            text-align: right;
+        }
+        .message.received {
+            background-color: #f1f8e9;
+        }
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+        .log {
+            font-family: monospace;
+            font-size: 12px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px;
+            border-radius: 4px;
+            height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .log-entry {
+            margin: 2px 0;
+        }
+        .log-entry.info { color: #4ec9b0; }
+        .log-entry.success { color: #4ec9b0; }
+        .log-entry.error { color: #f48771; }
+        .log-entry.warning { color: #dcdcaa; }
+    </style>
+</head>
+<body>
+    <h1>🔌 Socket.IO Chat Test Client</h1>
+    
+    <div class="container">
+        <h2>Connection Settings</h2>
+        <input type="text" id="serverUrl" placeholder="Server URL" value="http://localhost:3000">
+        <input type="text" id="jwtToken" placeholder="JWT Token (from login/register)">
+        <button onclick="connect()">Connect</button>
+        <button onclick="disconnect()">Disconnect</button>
+        <div id="connectionStatus" class="status disconnected">Disconnected</div>
+    </div>
+
+    <div class="two-column">
+        <div class="container">
+            <h2>Send Message</h2>
+            <input type="text" id="receiverId" placeholder="Receiver User ID">
+            <textarea id="messageContent" placeholder="Type your message..." rows="4"></textarea>
+            <button onclick="sendMessage()">Send Message</button>
+            <button onclick="startTyping()">Start Typing</button>
+            <button onclick="stopTyping()">Stop Typing</button>
+        </div>
+
+        <div class="container">
+            <h2>User Status</h2>
+            <div id="userStatus">Not connected</div>
+            <div id="typingStatus"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Messages</h2>
+        <div id="messages" class="messages"></div>
+        <button onclick="clearMessages()">Clear Messages</button>
+    </div>
+
+    <div class="container">
+        <h2>Event Log</h2>
+        <div id="eventLog" class="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script>
+        let socket = null;
+        let currentUserId = null;
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('eventLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateStatus(connected) {
+            const statusDiv = document.getElementById('connectionStatus');
+            if (connected) {
+                statusDiv.className = 'status connected';
+                statusDiv.textContent = '✅ Connected';
+            } else {
+                statusDiv.className = 'status disconnected';
+                statusDiv.textContent = '❌ Disconnected';
+            }
+        }
+
+        function connect() {
+            const serverUrl = document.getElementById('serverUrl').value;
+            const token = document.getElementById('jwtToken').value;
+
+            if (!token) {
+                alert('Please enter a JWT token');
+                return;
+            }
+
+            log(`Connecting to ${serverUrl}...`, 'info');
+            
+            socket = io(serverUrl, {
+                auth: {
+                    token: token
+                }
+            });
+
+            socket.on('connect', () => {
+                log('✅ Connected to server', 'success');
+                updateStatus(true);
+                currentUserId = socket.id;
+            });
+
+            socket.on('disconnect', () => {
+                log('❌ Disconnected from server', 'error');
+                updateStatus(false);
+            });
+
+            socket.on('connect_error', (error) => {
+                log(`Connection error: ${error.message}`, 'error');
+                updateStatus(false);
+            });
+
+            socket.on('user:online', (data) => {
+                log(`User online: ${JSON.stringify(data)}`, 'success');
+                document.getElementById('userStatus').textContent = `Online: ${data.userId}`;
+            });
+
+            socket.on('user:status', (data) => {
+                log(`User status changed: ${data.userId} is ${data.status ? 'online' : 'offline'}`, 'info');
+            });
+
+            socket.on('message:sent', (message) => {
+                log(`Message sent: ${message.content}`, 'success');
+                addMessage(message, 'sent');
+            });
+
+            socket.on('message:received', (message) => {
+                log(`Message received: ${message.content}`, 'success');
+                addMessage(message, 'received');
+            });
+
+            socket.on('message:read', (data) => {
+                log(`Message read: ${data.messageId}`, 'info');
+            });
+
+            socket.on('message:error', (error) => {
+                log(`Message error: ${error.error}`, 'error');
+                alert(`Error: ${error.error}`);
+            });
+
+            socket.on('typing:start', (data) => {
+                log(`${data.username || data.userId} is typing...`, 'warning');
+                document.getElementById('typingStatus').textContent = `${data.username || data.userId} is typing...`;
+            });
+
+            socket.on('typing:stop', (data) => {
+                log(`User ${data.userId} stopped typing`, 'info');
+                document.getElementById('typingStatus').textContent = '';
+            });
+        }
+
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+                log('Disconnected manually', 'info');
+            }
+        }
+
+        function sendMessage() {
+            if (!socket || !socket.connected) {
+                alert('Please connect first');
+                return;
+            }
+
+            const receiverId = document.getElementById('receiverId').value;
+            const content = document.getElementById('messageContent').value;
+
+            if (!receiverId || !content) {
+                alert('Please enter receiver ID and message content');
+                return;
+            }
+
+            socket.emit('message:send', {
+                content: content,
+                receiverId: receiverId
+            });
+
+            document.getElementById('messageContent').value = '';
+            log(`Sending message to ${receiverId}: ${content}`, 'info');
+        }
+
+        function startTyping() {
+            if (!socket || !socket.connected) {
+                alert('Please connect first');
+                return;
+            }
+
+            const receiverId = document.getElementById('receiverId').value;
+            if (!receiverId) {
+                alert('Please enter receiver ID');
+                return;
+            }
+
+            socket.emit('typing:start', {
+                receiverId: receiverId
+            });
+        }
+
+        function stopTyping() {
+            if (!socket || !socket.connected) {
+                alert('Please connect first');
+                return;
+            }
+
+            const receiverId = document.getElementById('receiverId').value;
+            if (!receiverId) {
+                alert('Please enter receiver ID');
+                return;
+            }
+
+            socket.emit('typing:stop', {
+                receiverId: receiverId
+            });
+        }
+
+        function addMessage(message, type) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const sender = type === 'sent' ? 'You' : message.sender?.username || 'Unknown';
+            messageDiv.innerHTML = `
+                <strong>${sender}:</strong> ${message.content}
+                <br><small>${new Date(message.createdAt).toLocaleString()}</small>
+            `;
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '';
+        }
+
+        function clearLog() {
+            document.getElementById('eventLog').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
+
+

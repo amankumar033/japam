@@ -1,0 +1,8 @@
+{
+  "watch": ["src"],
+  "ext": "js",
+  "ignore": ["src/**/*.test.js"],
+  "exec": "node --experimental-modules src/server.js"
+}
+
+
