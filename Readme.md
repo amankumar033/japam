@@ -55,7 +55,7 @@ npm install
 Create a `.env` file in the project root:
 
 ```env
-DATABASE_URL="postgres://USER:PASSWORD@HOST:5432/postgres?sslmode=require"
+DATABASE_URL=DATABASE_URL="postgres://0d7ae37931efef4775bd2bec3725442f1b193533bdcb062c6de0db94b26f639f:sk_pOB5PW2AavISwk3ZAiN80@db.prisma.io:5432/postgres?sslmode=require"
 JWT_SECRET="your-super-secret-jwt-key-min-32-chars"
 JWT_EXPIRES_IN="7d"
 PORT=3000
@@ -190,6 +190,15 @@ fetch('http://localhost:3000/api/auth/register', {
 6. 🎉 Messages appear instantly
 
 ---
+
+
+## Images
+
+![Socket Test Client – Connected](images/1.png)
+
+![Socket Test Client – Connected](images/2.png)
+
+![Socket Test Client – Connected](images/3.png)
 
 ### Step 3: Test Online / Offline Status
 
