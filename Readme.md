@@ -1,148 +1,165 @@
-# Real-Time One-to-One Chat Backend
+# 💬 Real-Time One-to-One Chat Backend
 
+A **production-ready real-time chat backend** built with **Node.js, Socket.IO, PostgreSQL, and Prisma**, featuring JWT authentication, presence tracking, and persistent messaging.
 
-## Features
+---
 
-- ✅ **JWT Authentication** - Secure socket and HTTP endpoint authentication
-- ✅ **Real-Time Messaging** - Instant message send/receive via Socket.IO
-- ✅ **Online/Offline Status** - Track user presence in real-time
-- ✅ **Message Persistence** - Store and retrieve chat history from PostgreSQL
-- ✅ **Production Ready** - Error handling, validation, security best practices
-- ✅ **Comprehensive Tests** - Unit and integration tests included
+## 🚀 Features
 
-## Tech Stack
+* ✅ **JWT Authentication** – Secure HTTP & Socket authentication
+* ✅ **Real-Time Messaging** – Instant one-to-one chat using Socket.IO
+* ✅ **Online / Offline Status** – Real-time presence tracking
+* ✅ **Message Persistence** – Chat history stored in PostgreSQL
+* ✅ **Production Ready** – Validation, error handling & security best practices
+* ✅ **Comprehensive Tests** – Unit & integration tests included
 
-- **Runtime**: Node.js (ES Modules)
-- **WebSocket**: Socket.IO v4
-- **HTTP Server**: Express.js
-- **Database**: PostgreSQL (via Prisma ORM)
-- **Authentication**: JWT (JSON Web Tokens)
-- **Validation**: Zod
-- **Testing**: Jest + Supertest
+---
 
-## Prerequisites
+## 🧰 Tech Stack
 
-- Node.js (v18 or higher)
-- npm or yarn
-- PostgreSQL database (connection string provided)
+* **Runtime:** Node.js (ES Modules)
+* **WebSocket:** Socket.IO v4
+* **HTTP Server:** Express.js
+* **Database:** PostgreSQL (Prisma ORM)
+* **Authentication:** JWT (JSON Web Tokens)
+* **Validation:** Zod
+* **Testing:** Jest + Supertest
 
-## Installation
+---
 
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd japam
-   ```
+## 📦 Prerequisites
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+* Node.js **v18+**
+* npm or yarn
+* PostgreSQL database (connection string required)
 
-3. **Set up environment variables**
-   
-   Create a `.env` file in the root directory:
-   ```env
-   DATABASE_URL="postgres://0d7ae37931efef4775bd2bec3725442f1b193533bdcb062c6de0db94b26f639f:sk_pOB5PW2AavISwk3ZAiN80@db.prisma.io:5432/postgres?sslmode=require"
-   JWT_SECRET="your-super-secret-jwt-key-change-in-production-min-32-chars"
-   JWT_EXPIRES_IN="7d"
-   PORT=3000
-   NODE_ENV=development
-   CORS_ORIGIN="*"
-   ```
+---
 
-4. **Generate Prisma Client**
-   ```bash
-   npm run prisma:generate
-   ```
+## ⚙️ Installation
 
-5. **Run database migrations**
-   ```bash
-   npm run prisma:migrate
-   ```
+### 1️⃣ Clone the Repository
 
-   This will create the `users` and `messages` tables in your PostgreSQL database.
+```bash
+git clone <your-repo-url>
+cd japam
+```
 
-## Running the Application
+### 2️⃣ Install Dependencies
+
+```bash
+npm install
+```
+
+### 3️⃣ Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+DATABASE_URL="postgres://USER:PASSWORD@HOST:5432/postgres?sslmode=require"
+JWT_SECRET="your-super-secret-jwt-key-min-32-chars"
+JWT_EXPIRES_IN="7d"
+PORT=3000
+NODE_ENV=development
+CORS_ORIGIN="*"
+```
+
+> ⚠️ **Important:** Never commit real credentials to GitHub.
+
+---
+
+### 4️⃣ Generate Prisma Client
+
+```bash
+npm run prisma:generate
+```
+
+### 5️⃣ Run Database Migrations
+
+```bash
+npm run prisma:migrate
+```
+
+This will create the **users** and **messages** tables.
+
+---
+
+## ▶️ Running the Application
 
 ### Development Mode
+
 ```bash
 npm run dev
 ```
 
-The server will start on `http://localhost:3000` (or the port specified in `.env`).
+Server runs at:
+
+```
+http://localhost:3000
+```
 
 ### Production Mode
+
 ```bash
 npm start
+```
 
-1.## 📋 Method 1: Interactive Socket Client (Recommended)
+---
 
-### Step 1: Get JWT Token
+## 🔐 Authentication & Socket Testing
 
-**Register a user:**
+## 📋 Method 1: Interactive Socket Client (Recommended)
+
+### Step 1: Register User (Get JWT Token)
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
-  -d "{\"username\":\"testuser\",\"email\":\"test@example.com\",\"password\":\"password123\"}"
+  -d '{"username":"testuser","email":"test@example.com","password":"password123"}'
 ```
-***the username and email should be unique and also you can use postman for this ***
 
-**Save the token** from the response.
+* Username & email **must be unique**
+* You can also use **Postman**
+* Save the returned **JWT token**
 
-### Step 2: Run Interactive Client
+---
+
+### Step 2: Run Interactive Socket Client
 
 ```bash
-node scripts/test-socket-backend.js "YOUR_JWT_TOKEN_HERE"
+node scripts/test-socket-backend.js "YOUR_JWT_TOKEN"
 ```
 
-### Step 3: Use Commands
+---
 
-Once connected, you can use these commands:
+### Step 3: Available Commands
 
-```
-💬 Enter command (type "help" for commands): help
-
-📖 Available Commands:
-   send <receiverId> <message>  - Send a message
-   typing <receiverId>           - Start typing indicator
-   stoptyping <receiverId>       - Stop typing indicator
-   read <messageId>              - Mark message as read
-   status                        - Show connection status
-   disconnect / exit / quit     - Disconnect and exit
-   help                          - Show this help message
+```text
+send <receiverId> <message>   Send a message
+typing <receiverId>           Start typing indicator
+stoptyping <receiverId>       Stop typing indicator
+read <messageId>              Mark message as read
+status                        Show connection status
+disconnect | exit | quit      Disconnect
+help                          Show commands
 ```
 
-### Example Usage:
+#### Example
 
 ```bash
-# Send a message
 send abc123-user-id Hello, this is a test message!
-
-# Start typing indicator
 typing abc123-user-id
-
-# Stop typing indicator
 stoptyping abc123-user-id
-
-# Check status
 status
-
-# Disconnect
 exit
-
 ```
 
-2. ## For Frontend View 🧪 HTML Test Client (Easy Way to Test Real-Time Chat)
+---
 
+## 🧪 Method 2: HTML Frontend Test Client
 
-## 📋 Complete Step-by-Step Guide
+### Step 1: Register Users (Browser Console)
 
-### Step 1: Register Users (Get Tokens)
-
-**In browser console (F12):**
 ```javascript
-// Register User 1
 fetch('http://localhost:3000/api/auth/register', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -152,101 +169,116 @@ fetch('http://localhost:3000/api/auth/register', {
     password: 'password123'
   })
 })
-.then(r => r.json())
+.then(res => res.json())
 .then(data => {
   console.log('Token:', data.token);
   console.log('User ID:', data.user.id);
 });
 ```
 
-**Repeat for User 2** (change username/email)
-
-### Step 2: Test Real-Time Messaging
-
-1. Open `test-client.html`in browser 
-2. Paste token → Connect
-3. Enter receiver ID → Send message
-4. Open another tab with `test-client.html`
-5. Connect with second user's token
-6. **Messages appear in real-time!**
-
-### Step 2: Test Online/Offline Status
-
-**In test-client.html:**
-- Connect both users
-- Check "User Status" section - shows online status
-- Disconnect one user
-- Other user sees "User [id] is offline" in Event Log
-
-## Images
-
-![Socket Test Client – Connected](images/1.png)
-
-![Socket Test Client – Connected](images/2.png)
-
-![Socket Test Client – Connected](images/3.png)
-
-
-## 🎬 Quick Demo Flow
-
-1. **Start server:** `npm run dev`
-2. **Register 2 users** → Get tokens & user IDs
-3. **Open `test-client.html`** in Tab 1 → Connect User 1
-4. **Open `test-client.html`** in Tab 2 → Connect User 2
-5. **Send message from Tab 1** → See it appear in Tab 2 instantly! ✨
-6. **Disconnect Tab 1** → Tab 2 sees "User offline"
-7. **Reconnect Tab 1** → Tab 2 sees "User online"
+> Repeat for User 2 (change username & email)
 
 ---
 
-## API Endpoints
+### Step 2: Test Real-Time Chat
 
-### Authentication
+1. Open `test-client.html` in **Tab 1**
+2. Paste **User 1 token** → Connect
+3. Enter **Receiver ID** → Send message
+4. Open `test-client.html` in **Tab 2**
+5. Connect using **User 2 token**
+6. 🎉 Messages appear instantly
+
+---
+
+### Step 3: Test Online / Offline Status
+
+* Connect both users
+* Check **User Status** section
+* Disconnect one user
+* Other user sees **offline event**
+* Reconnect → status updates automatically
+
+---
+
+## 🎬 Demo Flow
+
+1. `npm run dev`
+2. Register **2 users**
+3. Open **two browser tabs** with `test-client.html`
+4. Connect both users
+5. Send messages in real-time ✨
+6. Disconnect / reconnect to test presence
+
+---
+
+## 🔗 API Endpoints
+
+### 🔑 Authentication
 
 #### POST `/api/auth/register`
-Register a new user.
 
+Register a new user
 
 #### POST `/api/auth/login`
-Login and get JWT token.
 
+Login & receive JWT token
 
-### Messages
+---
+
+### 💬 Messages
 
 #### GET `/api/messages/history/:userId`
-Get chat history with a specific user. Requires authentication.
 
+Fetch chat history with a user
 
-## Project Structure
+> 🔒 Requires authentication
 
-```
+---
+
+## 🗂 Project Structure
+
+```text
 .
 ├── src/
-│   ├── __tests__/          # Test files
+│   ├── __tests__/          # Tests
 │   │   ├── auth.test.js
 │   │   └── socket.test.js
-│   ├── config/             # Configuration files
+│   ├── config/             # Config
 │   │   └── database.js
-│   ├── controllers/         # Route controllers
+│   ├── controllers/        # Controllers
 │   │   ├── authController.js
 │   │   └── messageController.js
-│   ├── middleware/         # Express middleware
+│   ├── middleware/         # Middleware
 │   │   └── auth.js
-│   ├── routes/             # Express routes
+│   ├── routes/             # Routes
 │   │   ├── authRoutes.js
 │   │   └── messageRoutes.js
-│   ├── services/          # Business logic services
+│   ├── services/           # Socket services
 │   │   └── socketService.js
-│   ├── utils/             # Utility functions
+│   ├── utils/              # Utilities
 │   │   ├── jwt.js
 │   │   └── validation.js
-│   └── server.js          # Main server file
+│   └── server.js           # Entry point
 ├── prisma/
-│   └── schema.prisma      # Prisma schema
-├── .env.example          # Environment variables example
-├── .gitignore
-├── jest.config.js        # Jest configuration
-├── nodemon.json          # Nodemon configuration
+│   └── schema.prisma
+├── .env.example
+├── jest.config.js
+├── nodemon.json
 ├── package.json
 └── README.md
 ```
+
+---
+
+## ✅ Status
+
+✔ Fully functional
+✔ Secure & scalable
+✔ Ready for production & frontend integration
+
+---
+
+## 🧑‍💻 Author
+
+Built with ❤️ for real-time applications
