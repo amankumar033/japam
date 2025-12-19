@@ -182,6 +182,7 @@ fetch('http://localhost:3000/api/auth/register', {
 
 ![Socket Test Client – Connected](images/1.png)
 ![Socket Test Client – Connected](images/2.png)
+![Socket Test Client – Connected](images/3.png)
 
 
 ## 🎬 Quick Demo Flow
