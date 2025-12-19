@@ -105,7 +105,6 @@ npm start
 
 ---
 
-## 🔐 Authentication & Socket Testing
 
 ## 📋 Method 1: Interactive Socket Client (Recommended)
 
@@ -157,7 +156,7 @@ exit
 
 ## 🧪 Method 2: HTML Frontend Test Client
 
-### Step 1: Register Users (Browser Console)
+### Step 1: Register Users (Browser Console OR Postman)
 
 ```javascript
 fetch('http://localhost:3000/api/auth/register', {
